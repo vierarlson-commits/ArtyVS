@@ -3,12 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>WebLeap</title>
+    <style>
+        .image-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 24px; /* Slightly increased gap to make room for text space */
+        width: 100%;
+        max-width: 800px;
+        }
+
+        /* 1. Reset default browser margins on the figure tag */
+        .image-grid figure {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column; /* Stacks the image on top and text on bottom */
+        }
+
+        /* 2. Target the images inside the figure */
+        .image-grid figure img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px;
+        }
+
+        /* 3. Style your captions */
+        .image-grid figcaption {
+        margin-top: 8px; /* Adds space between the image and the text */
+        font-size: 0.9rem;
+        color: #555; /* Soft grey color for the caption */
+        text-align: center; /* Centers the text under the image */
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>WebLeep</h1>
-        
+        <h1>WebLeap</h1>
+        <nav>
+            <ul>
+                <li><a href="main.html">Home</a></li>
+                <li><a href="album.html">Album</a></li>
+                <li><a href="favlit.html">Favorite Literature</a></li>
+                <li><a href="contacts.html">Contacts</a></li>
+            </ul>
+        </nav>
+        <h1>Welcome to WebLeap</h1>
     </header>
+    <main>
+        <section> 
+            <p>This is an experimental website where I practice coding.<br>
+                You can see San Francisco skyline down below!
+            </p>
+            <div class="image-grid">
+                <figure>
+                    <img src="SFskyline.jpg" alt="Skyline">
+                    <figcaption>San Francisco Skyline</figcaption>
+                </figure>
+                <figure>
+                    <img src="Canary Wharf London.jpg" alt="Canary Wharf London">
+                    <figcaption>Canary Wharf London</figcaption>
+                </figure>
+                <figure>
+                    <img src="MoonSky  behind branches.jpg" alt="Moon">
+                    <figcaption>Moon Sky behind branches</figcaption>
+                </figure>s
+                <figure>
+                    <img src="SanFrancisco USA.jpg" alt="San Francisco">
+                    <figcaption>San Francisco</figcaption>
+                </figure>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
