@@ -1,0 +1,60 @@
+/* Navigation Bar */
+.navbar {
+    display: flex;
+    padding: 10px 20px;
+}
+.nav-links {
+    list-style: none;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    gap: 50px;
+}
+.nav-links a {
+    font-family: "Bebas Neue", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    font-size: 26px;
+    border-radius: 10px;
+    padding: 2px 5px;
+    transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+    color:rgb(0, 0, 0);
+    background-color: rgba(254, 234, 161, 0.968);
+    box-shadow: 0 0 12px rgb(251, 228, 154);
+}
+
+.home-text {
+    font-family: "Bebas Neue", sans-serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 36px;
+    text-decoration: none;
+    color: rgb(0, 0, 0);
+}
+
+/* Main.html content styles */
+.introduction-text {
+    font-family: "IM Fell French Canon SC", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+}
+
+.image-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}

@@ -4,76 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebLeap</title>
-    <style>
-        .image-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 24px; /* Slightly increased gap to make room for text space */
-        width: 100%;
-        max-width: 800px;
-        }
-
-        /* 1. Reset default browser margins on the figure tag */
-        .image-grid figure {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column; /* Stacks the image on top and text on bottom */
-        }
-
-        /* 2. Target the images inside the figure */
-        .image-grid figure img {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-        border-radius: 8px;
-        }
-
-        /* 3. Style your captions */
-        .image-grid figcaption {
-        margin-top: 8px; /* Adds space between the image and the text */
-        font-size: 0.9rem;
-        color: #555; /* Soft grey color for the caption */
-        text-align: center; /* Centers the text under the image */
-        }
-    </style>
+    <!-- Great Vibes fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <!-- IM Fell French Canon SC fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+French+Canon+SC&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>WebLeap</h1>
-        <nav>
-            <ul>
+        <nav class="navbar">
+            <a href="main.html" class="home-text">WebLeap</a>
+            <ul class="nav-links">
                 <li><a href="main.html">Home</a></li>
-                <li><a href="album.html">Album</a></li>
-                <li><a href="favlit.html">Favorite Literature</a></li>
+                <li><a href="hobbies.html">Hobbies</a></li>
+                <li><a href="literature.html">Favorite Literature</a></li>
                 <li><a href="contacts.html">Contacts</a></li>
             </ul>
         </nav>
-        <h1>Welcome to WebLeap</h1>
     </header>
     <main>
+        <hr>
         <section> 
-            <p>This is an experimental website where I practice coding.<br>
-                You can see San Francisco skyline down below!
+            <p class="introduction-text">
+            This website is made with HTML, CSS, and Effort!<br>
+            Here you can find information about me, my hobbies and my favorite literature.<br>
+            I'm planning to add more content in the future, so stay tuned for updates!
             </p>
-            <div class="image-grid">
-                <figure>
-                    <img src="SFskyline.jpg" alt="Skyline">
-                    <figcaption>San Francisco Skyline</figcaption>
-                </figure>
-                <figure>
-                    <img src="Canary Wharf London.jpg" alt="Canary Wharf London">
-                    <figcaption>Canary Wharf London</figcaption>
-                </figure>
-                <figure>
-                    <img src="MoonSky  behind branches.jpg" alt="Moon">
-                    <figcaption>Moon Sky behind branches</figcaption>
-                </figure>s
-                <figure>
-                    <img src="SanFrancisco USA.jpg" alt="San Francisco">
-                    <figcaption>San Francisco</figcaption>
-                </figure>
-            </div>
+            <figure class="image-container">
+                <img src="SanFrancisco USA.jpg" alt="San Francisco, USA">
+            </figure>
         </section>
     </main>
 </body>
