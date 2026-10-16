@@ -1,60 +1,81 @@
-/* Navigation Bar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* Header contents */
 .navbar {
     display: flex;
-    padding: 10px 20px;
+    padding: 10px 30px;
+    background-color: #07afd3;
 }
+
+.home-text {
+    font-family: "Shadows Into Light", cursive;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 42px;
+    text-decoration: none;
+    color: #ffffc7;
+    transition: text-shadow 0.3s ease-out, color 0.3s ease-out;
+}
+
+.home-text:hover {
+    text-shadow: 0 0 10px #EFDFBB,
+                 0 0 20px #EFDFBB,
+                 0 0 35px #EFDFBB
+}
+
 .nav-links {
     list-style: none;
     display: flex;
     justify-content: flex-end;
     width: 100%;
     gap: 50px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
+
 .nav-links a {
-    font-family: "Bebas Neue", sans-serif;
-    font-weight: 400;
+    font-family: "Shadows Into Light", cursive;
+    font-weight: 600;
     font-style: normal;
-    color: rgb(0, 0, 0);
+    color: #ffffc7;
     text-decoration: none;
-    font-size: 26px;
-    border-radius: 10px;
-    padding: 2px 5px;
-    transition: all 0.3s ease;
+    font-size: 40px;
+    transition: text-shadow 0.3s ease-out;
 }
 
 .nav-links a:hover {
-    color:rgb(0, 0, 0);
-    background-color: rgba(254, 234, 161, 0.968);
-    box-shadow: 0 0 12px rgb(251, 228, 154);
-}
-
-.home-text {
-    font-family: "Bebas Neue", sans-serif;
-    font-weight: 400;
-    font-style: italic;
-    font-size: 36px;
-    text-decoration: none;
-    color: rgb(0, 0, 0);
-}
+    text-shadow: 0 0 5px #EFDFBB,
+                 0 0 15px #EFDFBB,
+                 0 0 30px #EFDFBB;
+}                       
 
 /* Main.html content styles */
-.introduction-text {
-    font-family: "IM Fell French Canon SC", serif;
-    font-weight: 400;
-    font-style: normal;
-    font-size: 18px;
-    line-height: 1.6;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.image-container {
-    display: flex;
-    justify-content: center;
-}
-
-.image-container img {
+.background-image {
+    display: block;
     max-width: 100%;
     height: auto;
-    border-radius: 10px;
 }
+
+.welcome-section {
+    display: flex;
+    justify-content: center;
+    background-color: #140b1a;
+    border-bottom: 10px solid #EFDFBB;
+}
+
+.welcome-message {
+    display: flex;
+    text-align: center;
+    gap: 20px;
+    font-family: "Shadows Into Light", cursive;
+    font-weight: 400;
+    font-style: normal;
+    color: #EFDFBB;
+    font-size: 24px;
+}
+
