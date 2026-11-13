@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clay Sprawl</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=DotGothic16&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<style>
+/* Layout: a fixed clay diorama fills the viewport; one reading column of puffy clay slabs
+   scrolls down the left while the camera walks around the city on the right. Single night theme by choice. */
+:root{
+  color-scheme: dark;
+  --night:#1b1230;      /* aubergine sky */
+  --night-2:#3a1f5c;    /* horizon glow */
+  --clay:#2d2149;       /* slab body */
+  --clay-up:#3b2c5f;    /* raised slab */
+  --ink:#f6ecff;
+  --muted:#bdaedb;
+  --pink:#ff74b1;
+  --teal:#55e3d2;
+  --mustard:#ffc955;
+  --lilac:#a98dfb;
+  --hi:rgba(255,255,255,.09);
+  --lo:rgba(8,3,20,.5);
+  --drop:rgba(6,2,16,.65);
+  --scrim:rgba(27,18,48,.82);
+  --display:"Dela Gothic One","Arial Black",Impact,sans-serif;
+  --body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Trebuchet MS",system-ui,sans-serif;
+  --mono:"DotGothic16","Courier New",monospace;
+}
+html{scroll-behavior:smooth}
+body{margin:0}
+[hidden]{display:none!important}
+body{
+  background:var(--night);color:var(--ink);
+  font-family:var(--body);font-size:1.0625rem;line-height:1.65;
+  overflow-x:hidden;
+}
+.sky{position:fixed;inset:0;z-index:0;
+  background:radial-gradient(120% 80% at 70% 100%,var(--night-2) 0%,var(--night) 62%)}
+#city{position:fixed;inset:0;width:100%;height:100%;z-index:1;display:block}
+.scrim{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,var(--night) 0%,var(--scrim) 30%,transparent 64%)}
+.wrap{position:relative;z-index:3;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 48px}
+.col{width:min(560px,100%);margin-left:clamp(0px,5vw,72px);
+  display:flex;flex-direction:column;gap:clamp(120px,34vh,300px)}
+
+/* top bar */
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;
+  width:min(560px,100%);margin-left:clamp(0px,5vw,72px);margin-bottom:clamp(40px,9vh,96px)}
+.mark{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em;color:var(--mustard);text-decoration:none}
+.bar nav{display:flex;flex-wrap:wrap;gap:4px 16px}
+.bar nav a{font-family:var(--mono);font-size:.9rem;color:var(--muted);text-decoration:none;
+  padding:4px 0;border-bottom:2px solid transparent}
+.bar nav a:hover{color:var(--ink);border-bottom-color:var(--pink)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:10px}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:22px;text-shadow:0 2px 18px var(--night)}
+.eyebrow{font-family:var(--mono);font-size:.95rem;letter-spacing:.14em;color:var(--teal);margin:0}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2.7rem,9vw,5.4rem);line-height:1.02;
+  margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1 span{display:block}
+h1 .low{color:var(--pink)}
+.lede{margin:0;max-width:34em;font-size:1.15rem;color:var(--ink)}
+.controls{display:flex;flex-wrap:wrap;gap:12px}
+.btn{font:700 .98rem var(--body);color:var(--night);background:var(--pink);
+  border:0;border-radius:999px;padding:12px 22px;cursor:pointer;text-shadow:none;
+  box-shadow:inset 3px 3px 6px rgba(255,255,255,.35),inset -4px -5px 8px rgba(120,20,70,.35),0 10px 18px -8px var(--drop);
+  transition:transform .12s ease}
+.btn.alt{background:var(--teal);
+  box-shadow:inset 3px 3px 6px rgba(255,255,255,.4),inset -4px -5px 8px rgba(10,90,90,.35),0 10px 18px -8px var(--drop)}
+.btn:hover{transform:translateY(-2px)}
+.btn:active,.btn[aria-pressed="false"]{transform:translateY(1px) scale(.98)}
+.btn[aria-pressed="false"]{filter:saturate(.45) brightness(.8)}
+
+/* clay slabs */
+.slab{background:var(--clay);border-radius:38px;padding:clamp(22px,4.5vw,38px);
+  display:flex;flex-direction:column;gap:22px;
+  box-shadow:inset 7px 7px 16px var(--hi),inset -9px -11px 20px var(--lo),0 30px 44px -22px var(--drop)}
+.tag{font-family:var(--mono);font-size:.9rem;letter-spacing:.14em;color:var(--mustard);margin:0}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,4.6vw,2.3rem);line-height:1.12;
+  margin:0;text-wrap:balance}
+.slab p{margin:0}
+.slab > p{max-width:36em}
+.muted{color:var(--muted)}
+
+/* motifs */
+.motifs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.motifs li{min-width:0;background:var(--clay-up);border-radius:24px;padding:16px 18px;
+  display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;
+  box-shadow:inset 4px 4px 9px var(--hi),inset -5px -6px 10px var(--lo)}
+.motifs i{width:22px;height:22px;border-radius:8px 11px 9px 12px;background:var(--c);
+  box-shadow:inset 2px 2px 3px rgba(255,255,255,.45),inset -2px -3px 4px rgba(0,0,0,.3)}
+.motifs b{font-weight:700;font-size:1.05rem}
+.motifs span{grid-column:1 / -1;color:var(--muted);font-size:.97rem;line-height:1.5}
+
+/* timeline */
+.line{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px;position:relative}
+.line::before{content:"";position:absolute;left:4.55rem;top:6px;bottom:6px;width:6px;border-radius:6px;
+  background:var(--clay-up);box-shadow:inset 2px 2px 3px var(--hi),inset -2px -2px 3px var(--lo)}
+.line li{display:grid;grid-template-columns:3.6rem 1fr;gap:2.4rem;align-items:baseline;position:relative}
+.line li::before{content:"";position:absolute;left:4.28rem;top:.5em;width:15px;height:15px;border-radius:50%;
+  background:var(--pink);box-shadow:inset 2px 2px 3px rgba(255,255,255,.5),inset -2px -2px 3px rgba(0,0,0,.3)}
+.line time{font-family:var(--mono);font-size:1.1rem;color:var(--mustard);font-variant-numeric:tabular-nums}
+.line div{min-width:0}
+.line b{display:block;font-weight:700}
+.line span{color:var(--muted);font-size:.97rem;line-height:1.5;display:block}
+
+/* canon */
+.canon{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:22px 18px}
+.canon section{min-width:0;display:flex;flex-direction:column;gap:10px}
+.canon h3{font-family:var(--mono);font-weight:400;font-size:.95rem;letter-spacing:.14em;margin:0;color:var(--c)}
+.canon ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.canon li{line-height:1.3}
+.canon li b{display:block;font-weight:700}
+.canon li span{color:var(--muted);font-size:.9rem}
+
+/* offshoots */
+.off{margin:0;display:grid;grid-template-columns:auto 1fr;gap:12px 18px}
+.off dt{font-weight:700;color:var(--teal)}
+.off dd{margin:0;color:var(--muted);min-width:0}
+blockquote{margin:0;font-family:var(--display);font-size:clamp(1.3rem,3.8vw,1.8rem);line-height:1.25;text-wrap:balance}
+blockquote footer{font-family:var(--body);font-size:.95rem;color:var(--muted);margin-top:12px}
+.foot{font-family:var(--mono);font-size:.9rem;color:var(--muted);margin:0;text-shadow:0 2px 12px var(--night)}
+
+/* camera readout */
+.hud{position:fixed;z-index:4;right:max(14px,env(safe-area-inset-right,0px));
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  font-family:var(--mono);font-size:.82rem;letter-spacing:.08em;color:var(--teal);
+  background:var(--scrim);border-radius:14px;padding:6px 12px;pointer-events:none;font-variant-numeric:tabular-nums}
+
+@media (max-width:820px){
+  .scrim{background:linear-gradient(180deg,var(--scrim) 0%,transparent 55%)}
+  .hero{padding-bottom:38vh}
+  .col{gap:clamp(140px,42vh,340px)}
+  .off{grid-template-columns:1fr;gap:2px}
+  .off dd{margin-bottom:12px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<canvas id="city" aria-hidden="true"></canvas>
+<div class="scrim"></div>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="mark" href="#top">CLAY//SPRAWL</a>
+    <nav aria-label="Sections">
+      <a href="#motifs">Motifs</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#canon">Starter kit</a>
+      <a href="#offshoots">Offshoots</a>
+    </nav>
+  </header>
+
+  <main class="col" id="top">
+    <section class="hero">
+      <p class="eyebrow">サイバーパンク · A FIELD GUIDE</p>
+      <h1><span>High tech.</span><span class="low">Low life.</span></h1>
+      <p class="lede">Cyberpunk is science fiction about a near future that went sideways. The machines are dazzling, the cities are broken, and the people at the bottom wire the two together. The city behind this page is sculpted from digital clay. Scroll to walk around it.</p>
+      <div class="controls">
+        <button class="btn" id="btn-motion" type="button" aria-pressed="true">Pause city</button>
+        <button class="btn alt" id="btn-rain" type="button" aria-pressed="true">Rain on</button>
+      </div>
+    </section>
+
+    <section class="slab" id="motifs">
+      <p class="tag">MOTIFS</p>
+      <h2>Six things every cyberpunk city is built from</h2>
+      <ul class="motifs">
+        <li style="--c:var(--pink)"><i></i><b>Megacorporations</b><span>Companies that outgrew governments and now run the police, the news and the weather.</span></li>
+        <li style="--c:var(--teal)"><i></i><b>The sprawl</b><span>Cities fused into one endless, vertical, rain-slick neighbourhood.</span></li>
+        <li style="--c:var(--mustard)"><i></i><b>Cyberspace</b><span>Data as a place you can jack into, walk through and rob.</span></li>
+        <li style="--c:var(--lilac)"><i></i><b>Body modification</b><span>Chrome arms, mirrored eyes, and the question of how much of you is left.</span></li>
+        <li style="--c:var(--teal)"><i></i><b>Artificial minds</b><span>AIs and replicants who want what people want: more life, fewer owners.</span></li>
+        <li style="--c:var(--pink)"><i></i><b>The street</b><span>Hackers, couriers and fixers who repurpose corporate tech for their own ends.</span></li>
+      </ul>
+    </section>
+
+    <section class="slab" id="timeline">
+      <p class="tag">TIMELINE</p>
+      <h2>How the genre got wired</h2>
+      <ol class="line">
+        <li><time datetime="1980">1980</time><div><b>The word is coined</b><span>Bruce Bethke writes the short story “Cyberpunk”. It reaches print in Amazing Stories in 1983.</span></div></li>
+        <li><time datetime="1982">1982</time><div><b>Blade Runner and Akira</b><span>Ridley Scott’s rain-soaked Los Angeles sets the look. Katsuhiro Otomo’s Neo-Tokyo manga begins the same year.</span></div></li>
+        <li><time datetime="1984">1984</time><div><b>Neuromancer</b><span>William Gibson’s debut novel makes “cyberspace” a household word and sweeps the Hugo, Nebula and Philip K. Dick awards.</span></div></li>
+        <li><time datetime="1986">1986</time><div><b>Mirrorshades</b><span>Bruce Sterling’s anthology gathers the movement’s writers under one cover and gives it a manifesto.</span></div></li>
+        <li><time datetime="1988">1988</time><div><b>Dice hit the table</b><span>Mike Pondsmith publishes the Cyberpunk role-playing game. Akira arrives in cinemas.</span></div></li>
+        <li><time datetime="1992">1992</time><div><b>Snow Crash</b><span>Neal Stephenson turns the genre into satire and names the Metaverse.</span></div></li>
+        <li><time datetime="1995">1995</time><div><b>Ghost in the Shell</b><span>Mamoru Oshii’s film asks where a mind ends once the body is fully manufactured.</span></div></li>
+        <li><time datetime="1999">1999</time><div><b>The Matrix</b><span>The Wachowskis bring simulated reality and black trench coats to the mainstream.</span></div></li>
+        <li><time datetime="2020">2020</time><div><b>Cyberpunk 2077</b><span>Pondsmith’s Night City becomes an open-world video game, three decades after the tabletop original.</span></div></li>
+      </ol>
+    </section>
+
+    <section class="slab" id="canon">
+      <p class="tag">STARTER KIT</p>
+      <h2>Where to jack in first</h2>
+      <div class="canon">
+        <section style="--c:var(--pink)">
+          <h3>READ</h3>
+          <ul>
+            <li><b>Neuromancer</b><span>William Gibson, 1984</span></li>
+            <li><b>Snow Crash</b><span>Neal Stephenson, 1992</span></li>
+            <li><b>Do Androids Dream of Electric Sheep?</b><span>Philip K. Dick, 1968</span></li>
+            <li><b>Altered Carbon</b><span>Richard K. Morgan, 2002</span></li>
+          </ul>
+        </section>
+        <section style="--c:var(--teal)">
+          <h3>WATCH</h3>
+          <ul>
+            <li><b>Blade Runner</b><span>Ridley Scott, 1982</span></li>
+            <li><b>Akira</b><span>Katsuhiro Otomo, 1988</span></li>
+            <li><b>Ghost in the Shell</b><span>Mamoru Oshii, 1995</span></li>
+            <li><b>The Matrix</b><span>The Wachowskis, 1999</span></li>
+          </ul>
+        </section>
+        <section style="--c:var(--mustard)">
+          <h3>PLAY</h3>
+          <ul>
+            <li><b>Shadowrun</b><span>Tabletop, 1989</span></li>
+            <li><b>Deus Ex</b><span>Ion Storm, 2000</span></li>
+            <li><b>Cyberpunk 2077</b><span>CD Projekt Red, 2020</span></li>
+            <li><b>Citizen Sleeper</b><span>Jump Over the Age, 2022</span></li>
+          </ul>
+        </section>
+      </div>
+    </section>
+
+    <section class="slab" id="offshoots">
+      <p class="tag">OFFSHOOTS</p>
+      <h2>The punks that came after</h2>
+      <dl class="off">
+        <dt>Post-cyberpunk</dt><dd>Same technology, but the heroes have jobs, families and a stake in the system.</dd>
+        <dt>Biopunk</dt><dd>Swaps the soldering iron for gene splicing. The body is the hardware.</dd>
+        <dt>Steampunk</dt><dd>Runs the same thought experiment backwards, on brass and coal.</dd>
+        <dt>Solarpunk</dt><dd>The optimistic reply: green cities, shared power, a future worth wanting.</dd>
+      </dl>
+      <blockquote>“The street finds its own uses for things.”
+        <footer>William Gibson, “Burning Chrome”, 1982</footer>
+      </blockquote>
+    </section>
+
+    <p class="foot">Sculpted in digital clay and animated on twos, 12 frames a second, like stop-motion.</p>
+  </main>
+</div>
+
+<div class="hud" id="hud" aria-hidden="true">CAM 000° · 12 FPS</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var canvas=document.getElementById('city'), hud=document.getElementById('hud');
+  var btnMotion=document.getElementById('btn-motion'), btnRain=document.getElementById('btn-rain');
+  if(!window.THREE){hud.hidden=true;return;}
+  var T=THREE, renderer;
+  try{renderer=new T.WebGLRenderer({canvas:canvas,antialias:true,alpha:true});}
+  catch(e){hud.hidden=true;return;}
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
+  renderer.outputEncoding=T.sRGBEncoding;
+  renderer.toneMapping=T.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
+
+  var scene=new T.Scene(); scene.fog=new T.Fog(0x2c1a4e,48,130);
+  var camera=new T.PerspectiveCamera(38,1,0.5,300);
+
+  /* lights: soft key + coloured bounce, like a tabletop set */
+  scene.add(new T.HemisphereLight(0xb98cff,0x16265a,0.42));
+  var key=new T.DirectionalLight(0xffc4dc,0.72); key.position.set(-26,40,18); key.castShadow=true;
+  key.shadow.mapSize.set(2048,2048); key.shadow.bias=-0.0006; key.shadow.radius=4;
+  var sc=key.shadow.camera; sc.left=-36;sc.right=36;sc.top=36;sc.bottom=-36;sc.near=1;sc.far=120;
+  scene.add(key);
+  var rim=new T.DirectionalLight(0x58e6ff,0.4); rim.position.set(30,14,-28); scene.add(rim);
+  var p1=new T.PointLight(0xff4fa3,2.0,60); p1.position.set(5,5,3); scene.add(p1);
+  var p2=new T.PointLight(0x3fe8ff,1.7,60); p2.position.set(-9,5,-7); scene.add(p2);
+
+  /* helpers */
+  var seed=20771; function rnd(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
+  function pick(a){return a[Math.floor(rnd()*a.length)];}
+  function clay(c){return new T.MeshStandardMaterial({color:c,roughness:0.95,metalness:0});}
+  function glow(c,op){return new T.MeshBasicMaterial({color:c,toneMapped:false,transparent:op!==undefined,opacity:op===undefined?1:op});}
+  function rbox(w,h,d,r,b){
+    b=b||Math.min(w,d,h)*0.12; var iw=w-2*b, id=d-2*b;
+    r=Math.max(0.01,Math.min(r,iw/2-0.001,id/2-0.001));
+    var s=new T.Shape(), x=-iw/2, y=-id/2;
+    s.moveTo(x+r,y); s.lineTo(x+iw-r,y); s.quadraticCurveTo(x+iw,y,x+iw,y+r);
+    s.lineTo(x+iw,y+id-r); s.quadraticCurveTo(x+iw,y+id,x+iw-r,y+id);
+    s.lineTo(x+r,y+id); s.quadraticCurveTo(x,y+id,x,y+id-r);
+    s.lineTo(x,y+r); s.quadraticCurveTo(x,y,x+r,y);
+    var g=new T.ExtrudeGeometry(s,{depth:Math.max(h-2*b,0.01),bevelEnabled:true,bevelSize:b,bevelThickness:b,bevelSegments:4,curveSegments:5});
+    g.rotateX(-Math.PI/2); g.translate(0,b,0); return g;
+  }
+  function wobble(g,amt,ph){ /* thumb-pressed unevenness */
+    var p=g.attributes.position;
+    for(var i=0;i<p.count;i++){var x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+      p.setXYZ(i,x+Math.sin(y*1.3+z*2.1+ph)*amt,y+Math.sin(x*1.9+z*1.7+ph*2)*amt*0.6,z+Math.sin(x*2.3+y*1.1+ph*3)*amt);}
+    p.needsUpdate=true; return g;
+  }
+  function mesh(g,m,cast){var o=new T.Mesh(g,m);o.castShadow=cast!==false;o.receiveShadow=true;return o;}
+
+  /* diorama base */
+  var base=mesh(new T.CylinderGeometry(29,27.5,2.4,72),clay(0x2e2150),false); base.position.y=-1.2; scene.add(base);
+  var rimT=mesh(new T.TorusGeometry(29,0.7,12,72),clay(0x4d3880),false); rimT.rotation.x=Math.PI/2; rimT.position.y=-0.15; scene.add(rimT);
+  var roadM=clay(0x231936);
+  var r1=mesh(rbox(54,0.14,3.3,1.2,0.05),roadM,false); scene.add(r1);
+  var r2=mesh(rbox(3.3,0.14,54,1.2,0.05),roadM,false); r2.position.y=0.01; scene.add(r2);
+
+  /* buildings */
+  var bodyCols=[0x6a48a8,0x4856b0,0x34889a,0x9a579e,0xd0628f,0x574490,0x3c70a0,0x7a5fc0];
+  var winCols=[0xffd98a,0xff8fc0,0x7ff0e6,0xfff2c9];
+  var cells=[-22,-16,-10,-4,4,10,16,22];
+  var wins=[], signSpots=[], beacons=[], vents=[], tallest={h:0};
+  var M=new T.Matrix4(), A=new T.Matrix4(), B=new T.Matrix4(), C=new T.Matrix4();
+  cells.forEach(function(cx){cells.forEach(function(cz){
+    var dist=Math.hypot(cx,cz); if(dist>25.5) return;
+    var w=3+rnd()*1.4, d=3+rnd()*1.4;
+    var h=2.6+rnd()*5+Math.max(0,15-dist*0.62)*(0.35+rnd()*0.75);
+    var g=new T.Group();
+    g.position.set(cx+(rnd()-.5)*0.6,0.1,cz+(rnd()-.5)*0.6);
+    g.rotation.set((rnd()-.5)*0.05,(rnd()-.5)*0.24,(rnd()-.5)*0.05);
+    g.updateMatrix(); scene.add(g);
+    var tiers=h>11?3:h>6.5?2:1, split=tiers===3?[.5,.3,.2]:tiers===2?[.62,.38]:[1];
+    var mat=clay(pick(bodyCols)), wc=pick(winCols), y=0, tw=w, td=d;
+    for(var k=0;k<tiers;k++){
+      var th=h*split[k]; tw=w*(1-0.2*k); td=d*(1-0.2*k);
+      var m=mesh(wobble(rbox(tw,th,td,0.5,0.22),0.07,rnd()*9),mat); m.position.y=y; g.add(m);
+      for(var f=0;f<4;f++){
+        var span=f%2?td:tw, half=(f%2?tw:td)/2, n=Math.floor((span-0.7)/0.62);
+        for(var i=0;i<n;i++) for(var yy=0.7;yy<th-0.6;yy+=0.85){
+          var r=rnd(); if(r<0.3) continue;
+          A.makeTranslation(0,y,0); B.makeRotationY(f*Math.PI/2); C.makeTranslation((i-(n-1)/2)*0.62,yy,half);
+          M.copy(g.matrix).multiply(A).multiply(B).multiply(C);
+          wins.push({m:M.clone(),lit:r>0.52,c:rnd()<0.8?wc:pick(winCols)});
+        }
+      }
+      y+=th;
+    }
+    if(h>tallest.h&&dist<12){tallest={h:h,g:g};}
+    var roof=rnd();
+    if(roof<0.4){ var ah=1.6+rnd()*2.6;
+      var a=mesh(new T.CylinderGeometry(0.06,0.09,ah,6),clay(0xd8cdf0)); a.position.set(0,h+ah/2,0); g.add(a);
+      var bl=new T.Mesh(new T.SphereGeometry(0.17,10,8),glow(0xff5a7a)); bl.position.set(0,h+ah,0); g.add(bl); beacons.push(bl);
+    } else if(roof<0.7){
+      var tk=mesh(new T.CylinderGeometry(0.55,0.6,0.9,14),clay(pick([0xffc955,0x55e3d2,0xff9a5c]))); tk.position.set(tw*0.15,h+0.5,-td*0.1); g.add(tk);
+    } else if(roof<0.85){ vents.push(new T.Vector3(g.position.x,h+0.2,g.position.z)); }
+    if(h>6&&rnd()<0.5) signSpots.push({g:g,w:w,h:h,side:rnd()<0.5?1:-1});
+  });});
+
+  /* windows: one instanced mesh, coloured per instance */
+  var winMesh=new T.InstancedMesh(rbox(0.34,0.44,0.1,0.08,0.03),new T.MeshBasicMaterial({toneMapped:false}),wins.length);
+  var dark=new T.Color(0x241b3c), col=new T.Color();
+  wins.forEach(function(wn,i){winMesh.setMatrixAt(i,wn.m);winMesh.setColorAt(i,wn.lit?col.setHex(wn.c):dark);});
+  scene.add(winMesh);
+
+  /* street: lamps and lane dashes */
+  var lampPts=[]; [-19,-13,-7,7,13,19].forEach(function(u){[-1.95,1.95].forEach(function(v){lampPts.push([u,v],[v,u]);});});
+  var posts=new T.InstancedMesh(new T.CylinderGeometry(0.06,0.08,1.5,6),clay(0xb8a8dc),lampPts.length);
+  var bulbs=new T.InstancedMesh(new T.SphereGeometry(0.2,10,8),glow(0xffd98a),lampPts.length);
+  lampPts.forEach(function(p,i){M.makeTranslation(p[0],0.85,p[1]);posts.setMatrixAt(i,M);M.makeTranslation(p[0],1.7,p[1]);bulbs.setMatrixAt(i,M);});
+  posts.castShadow=true; scene.add(posts,bulbs);
+  var dashN=0, dashes=new T.InstancedMesh(rbox(0.9,0.08,0.16,0.07,0.03),clay(0xffc955),40);
+  for(var u=-25;u<=25;u+=2.6){ if(Math.abs(u)<2.2) continue;
+    M.makeTranslation(u,0.13,0); dashes.setMatrixAt(dashN++,M);
+    M.makeRotationY(Math.PI/2).setPosition(0,0.14,u); dashes.setMatrixAt(dashN++,M); }
+  dashes.count=dashN; scene.add(dashes);
+
+  /* flying cars */
+  var cars=[], carCols=[0xff74b1,0x55e3d2,0xffc955,0xa98dfb,0xff9a5c,0xf6ecff];
+  var bodyG=new T.SphereGeometry(1,16,12), tailM=glow(0xff3d6e), headM=glow(0xfff2c9);
+  for(var i=0;i<18;i++){
+    var c=new T.Group();
+    var b=mesh(bodyG,clay(carCols[i%carCols.length])); b.scale.set(0.85,0.3,0.42); c.add(b);
+    var cab=mesh(bodyG,clay(0x2a2148)); cab.scale.set(0.42,0.26,0.32); cab.position.set(-0.05,0.24,0); c.add(cab);
+    var tl=new T.Mesh(bodyG,tailM); tl.scale.setScalar(0.11); tl.position.set(-0.82,0,0); c.add(tl);
+    var hl=new T.Mesh(bodyG,headM); hl.scale.setScalar(0.09); hl.position.set(0.82,0,0); c.add(hl);
+    var ring=i>=12;
+    c.userData=ring?{ring:true,r:26+rnd()*7,y:9+rnd()*9,sp:(rnd()<.5?-1:1)*(3+rnd()*3),off:rnd()*6.28}
+                   :{axis:i%2,dir:i%4<2?1:-1,y:1.3+rnd()*8.5,sp:5+rnd()*6,off:rnd()*56};
+    scene.add(c); cars.push(c);
+  }
+
+  /* hologram over the tallest tower */
+  var holo=new T.Group();
+  var hr=new T.Mesh(new T.TorusGeometry(1.7,0.34,12,36),glow(0x55e3d2,0.8)); holo.add(hr);
+  var hs=new T.Mesh(new T.SphereGeometry(0.7,18,14),glow(0xff74b1,0.9)); holo.add(hs);
+  var holoY=(tallest.h||14)+3.6;
+  if(tallest.g){holo.position.set(tallest.g.position.x,holoY,tallest.g.position.z);} else holo.position.set(0,holoY,0);
+  scene.add(holo);
+
+  /* blimp */
+  var blimp=new T.Group();
+  var hull=mesh(new T.SphereGeometry(1,24,16),clay(0xe86a9a)); hull.scale.set(3.2,1.15,1.15); blimp.add(hull);
+  var gon=mesh(rbox(1.3,0.45,0.6,0.2,0.1),clay(0x3a2a60)); gon.position.y=-1.5; blimp.add(gon);
+  [[0,0.9,0],[0,-0.9,0]].forEach(function(p){var f=mesh(rbox(1,0.9,0.16,0.07,0.05),clay(0xffc955)); f.position.set(-2.9,p[1]-0.45+ (p[1]>0?0.2:-0.2),0); blimp.add(f);});
+  var ad=new T.Mesh(rbox(2.4,0.7,0.1,0.04,0.03),glow(0x7ff0e6)); ad.position.set(0,-0.35,1.12); blimp.add(ad);
+  scene.add(blimp);
+
+  /* steam puffs */
+  var puffs=[], puffG=new T.SphereGeometry(0.45,10,8), puffM=clay(0xdcd0f4);
+  vents.slice(0,6).forEach(function(v,vi){for(var k=0;k<4;k++){var p=new T.Mesh(puffG,puffM);p.userData={v:v,ph:k/4+vi*0.13};scene.add(p);puffs.push(p);}});
+
+  /* smog clouds and moon */
+  var cloudM=clay(0x5a468c);
+  [[-18,24,-10],[14,27,-18],[6,22,20]].forEach(function(p){for(var k=0;k<5;k++){var s=new T.Mesh(puffG,cloudM);
+    s.position.set(p[0]+(k-2)*1.5,p[1]+Math.sin(k*2)*0.4,p[2]+Math.cos(k*3)*0.6);s.scale.setScalar(2.4+Math.sin(k*1.7)*0.9);s.castShadow=false;scene.add(s);}});
+  var moonM=new T.MeshStandardMaterial({color:0xffe9b8,emissive:0x7a6238,roughness:1,fog:false});
+  var moon=new T.Mesh(new T.SphereGeometry(7,28,20),moonM); moon.position.set(-42,36,-62); scene.add(moon);
+
+  /* rain: clay droplets */
+  var RN=360, rain=new T.InstancedMesh(new T.SphereGeometry(0.05,5,4),glow(0xbfe8ff,0.6),RN), drops=[];
+  for(var i=0;i<RN;i++){var a=rnd()*6.28,rr=Math.sqrt(rnd())*31;drops.push({x:Math.cos(a)*rr,z:Math.sin(a)*rr,y:rnd()*36,s:15+rnd()*9});}
+  rain.frustumCulled=false; scene.add(rain);
+
+  /* neon blade signs, lettered once the display face is ready */
+  function signTex(text,color){
+    var cv=document.createElement('canvas'); cv.width=128; cv.height=512; var x=cv.getContext('2d');
+    var ch=Array.from(text), step=500/ch.length, size=Math.min(96,step*0.9);
+    x.font=size+'px "Dela Gothic One","Arial Black",sans-serif'; x.textAlign='center'; x.textBaseline='middle';
+    x.shadowColor=color; x.shadowBlur=14; x.fillStyle=color;
+    ch.forEach(function(c,i){x.fillText(c,64,6+step*(i+0.5));x.fillText(c,64,6+step*(i+0.5));});
+    var t=new T.CanvasTexture(cv); t.encoding=T.sRGBEncoding; return t;
+  }
+  function buildSigns(){
+    var words=['ネオン','ラーメン','サイバー','ホテル','夜市','電脳','BAR','酒場','未来'], cols=['#ff74b1','#55e3d2','#ffc955','#c9b4ff'];
+    signSpots.forEach(function(s,i){
+      var sh=Math.min(3.2,s.h-2.4), slab=mesh(rbox(0.95,sh,0.24,0.2,0.08),clay(0x1f1634));
+      slab.position.set(s.side*(s.w/2+0.5),s.h*0.3,0); s.g.add(slab);
+      var mat=new T.MeshBasicMaterial({map:signTex(words[i%words.length],cols[i%cols.length]),transparent:true,toneMapped:false});
+      [1,-1].forEach(function(dz){var pl=new T.Mesh(new T.PlaneGeometry(0.75,sh*0.92),mat);
+        pl.position.set(0,sh/2,dz*0.13); if(dz<0) pl.rotation.y=Math.PI; slab.add(pl);});
+    });
+    dirty=true;
+  }
+  var fontsReady=(document.fonts&&document.fonts.load)?document.fonts.load('64px "Dela Gothic One"','ネオンラーメンサイバーホテル夜市電脳酒場未来BAR'):Promise.resolve();
+  Promise.race([fontsReady,new Promise(function(r){setTimeout(r,2500);})]).then(buildSigns,buildSigns);
+
+  /* state */
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var motion=!reduce, raining=true, time=3, lastTick=-1, dirty=true;
+  var sp=0, mx=0, my=0, smx=0, smy=0, W=0, H=0, heading=0;
+  function setBtn(b,on,a,z){b.setAttribute('aria-pressed',on?'true':'false');b.textContent=on?a:z;}
+  setBtn(btnMotion,motion,'Pause city','Play city');
+  btnMotion.addEventListener('click',function(){motion=!motion;setBtn(btnMotion,motion,'Pause city','Play city');});
+  btnRain.addEventListener('click',function(){raining=!raining;rain.visible=raining;setBtn(btnRain,raining,'Rain on','Rain off');dirty=true;});
+  window.addEventListener('pointermove',function(e){mx=e.clientX/W-0.5;my=e.clientY/H-0.5;},{passive:true});
+
+  function resize(){
+    W=window.innerWidth; H=window.innerHeight;
+    renderer.setSize(W,H,false); camera.aspect=W/H;
+    if(W>820) camera.setViewOffset(W,H,-W*0.25,0,W,H); else camera.setViewOffset(W,H,0,-H*0.16,W,H);
+    camera.updateProjectionMatrix(); dirty=true;
+  }
+  window.addEventListener('resize',resize); resize();
+
+  var dm=new T.Matrix4(), dv=new T.Vector3(), ds=new T.Vector3(1,7,1), dq=new T.Quaternion();
+  function tick(t,n){
+    cars.forEach(function(c){var u=c.userData,x,z,dx,dz,s=1;
+      if(u.ring){var a=t*u.sp/u.r+u.off;x=Math.cos(a)*u.r;z=Math.sin(a)*u.r;var sg=u.sp>0?1:-1;dx=-Math.sin(a)*sg;dz=Math.cos(a)*sg;}
+      else{var q=((t*u.sp+u.off)%56+56)%56-28;s=Math.max(0,Math.min(1,Math.min(q+28,28-q)/3));
+        var along=q*u.dir,lane=u.dir*0.8;
+        if(u.axis===0){x=along;z=lane;dx=u.dir;dz=0;}else{x=-lane;z=along;dx=0;dz=u.dir;}}
+      c.position.set(x,u.y+Math.sin(t*3+u.off)*0.09,z); c.rotation.y=Math.atan2(-dz,dx); c.scale.setScalar(s||0.001);});
+    holo.rotation.y=t*0.9; hr.rotation.x=Math.PI/2+Math.sin(t*0.7)*0.5; holo.position.y=holoY+Math.sin(t*1.3)*0.35;
+    var hsq=1+Math.sin(t*2.6)*0.12; hs.scale.set(hsq,1/hsq,hsq);
+    var ba=t*0.07+1.2; blimp.position.set(Math.cos(ba)*19,21+Math.sin(t*0.5)*0.5,Math.sin(ba)*19); blimp.rotation.y=-ba-Math.PI/2;
+    beacons.forEach(function(b,i){b.visible=((n>>2)+i)%3!==0;});
+    puffs.forEach(function(p){var u=p.userData,k=(t*0.22+u.ph)%1;
+      p.position.set(u.v.x+Math.sin(k*5+u.ph*9)*0.35,u.v.y+k*3.6,u.v.z);p.scale.setScalar(0.35+Math.sin(k*Math.PI)*0.9);});
+    if(raining){for(var i=0;i<RN;i++){var d=drops[i],y=36-((t*d.s+d.y)%36);dv.set(d.x,y,d.z);dm.compose(dv,dq,ds);rain.setMatrixAt(i,dm);}
+      rain.instanceMatrix.needsUpdate=true;}
+    for(var k=0;k<5;k++){var j=Math.floor(Math.random()*wins.length),wn=wins[j];wn.lit=!wn.lit;winMesh.setColorAt(j,wn.lit?col.setHex(wn.c):dark);}
+    if(winMesh.instanceColor) winMesh.instanceColor.needsUpdate=true;
+    p1.intensity=1.9+Math.sin(t*5)*0.15;
+  }
+
+  var prev=performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
+    var dt=Math.min(0.1,(now-prev)/1000); prev=now;
+    if(document.hidden) return;
+    var max=document.documentElement.scrollHeight-H, p=max>0?Math.min(1,Math.max(0,window.scrollY/max)):0;
+    var moved=Math.abs(p-sp)>0.0004||Math.abs(mx-smx)>0.002||Math.abs(my-smy)>0.002;
+    if(!motion&&!moved&&!dirty) return;
+    sp+=(p-sp)*Math.min(1,dt*5); smx+=(mx-smx)*Math.min(1,dt*4); smy+=(my-smy)*Math.min(1,dt*4);
+    if(motion) time+=dt;
+    var n=Math.floor(time*12);                       /* animate on twos: 12 poses a second */
+    if(n!==lastTick||dirty){lastTick=n;tick(n/12,n);}
+    var bow=Math.sin(sp*Math.PI), ang=0.85+sp*Math.PI*1.5+time*0.012+smx*0.1;
+    var rad=(58-17*bow)*(camera.aspect<1?1.45:1), hgt=23-9*bow+sp*7-smy*2;
+    camera.position.set(Math.cos(ang)*rad,hgt,Math.sin(ang)*rad); camera.lookAt(0,6.5,0);
+    var deg=Math.round(((ang*180/Math.PI)%360+360)%360);
+    if(deg!==heading){heading=deg;hud.textContent='CAM '+('00'+deg).slice(-3)+'° · '+(motion?'12 FPS':'HOLD')+(raining?' · RAIN':'');}
+    renderer.render(scene,camera); dirty=false;
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
